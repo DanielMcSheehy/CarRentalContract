@@ -42,9 +42,17 @@ contract CarRental {
     return rate*daysOwed;
   }
 
-  function payRent(uint index) public view { // TODO: scheduling Payable 
+  function payRent(uint index) public payable returns (bool) { // TODO: scheduling Payable 
     require(msg.sender == cars[index].renter);
     uint owedPayment = getPaymentDue(index);
+    if (msg.value == owedPayment) {
+      return true; 
+    }
+    else if (msg.value > owedPayment) {
+      msg.sender.transfer(msg.value - owedPayment);
+    } else {
+      return false;
+    }
   }
 
   uint value;
