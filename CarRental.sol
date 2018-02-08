@@ -7,9 +7,8 @@ contract CarRental {
     address renter;
     string carMake;
     string license;
-    uint16 monthlyRent;
+    uint16 dailyRent;
     uint32 startDate;
-    uint32 nextPaymentDate; //
   }
 
   Car[] public cars;
@@ -18,14 +17,14 @@ contract CarRental {
   mapping (address => uint) carNum;
   
 
-  function _createCarRental(address renter, string carMake, string license, uint16 monthlyRent) internal {
-    uint index = cars.push(Car(msg.sender, renter, carMake, license, monthlyRent, uint32(now), uint32(now + 1 days))) - 1;
+  function _createCarRental(address renter, string carMake, string license, uint16 dailyRent) internal {
+    uint index = cars.push(Car(msg.sender, renter, carMake, license, dailyRent, uint32(now))) - 1;
     carToOwner[index] = msg.sender;
     carNum[msg.sender]++;
   }
 
-  function deployCarRental(address renter, string carMake, string license, uint16 monthlyRent) public {
-    _createCarRental(renter, carMake,  license,  monthlyRent);
+  function deployCarRental(address renter, string carMake, string license, uint16 dailyRent) public {
+    _createCarRental(renter, carMake,  license,  dailyRent);
   }
 
   function setRent(uint _value) public {
@@ -33,14 +32,19 @@ contract CarRental {
   }
 
   function getRent(uint index) public constant returns (uint) {
-    cars[index].monthlyRent;
+    cars[index].dailyRent;
     return value;
+  }
+
+  function getPaymentDue(uint index) public constant returns (uint) {
+    uint rate = cars[index].dailyRent;
+    uint daysOwed = (now - cars[index].startDate)/(1 days);
+    return rate*daysOwed;
   }
 
   function payRent(uint index) public view { // TODO: scheduling Payable 
     require(msg.sender == cars[index].renter);
-    //uint day = cars[index].nextPaymentDate;
-    //day++;
+    uint owedPayment = getPaymentDue(index);
   }
 
   uint value;
